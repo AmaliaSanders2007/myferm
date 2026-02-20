@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>АГРО-КВЕСТ: Наследие</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0a2f1f, #1a4a2a);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 12px;
+        }
+
+        #game {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(10, 47, 31, 0.7);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        /* Шапка */
+        .header {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 24px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .player-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .player-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-badge {
+            background: #ffd700;
+            color: #0a2f1f;
+            padding: 5px 15px;
+            border-radius: 30px;
+            font-weight: 800;
+        }
+
+        .exp-bar-container {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .exp-label {
+            display: flex;
+            justify-content: space-between;
+            color: #ffd700;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+
+        .exp-bar {
+            height: 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .exp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffb347);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        /* Ресурсы */
+        .resources-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .resource-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,215,0,0.2);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .resource-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .resource-bar-bg {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .resource-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffb347);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .resource-value {
+            color: #ffd700;
+            font-weight: bold;
+            text-align: right;
+        }
+
+        /* Основной контент */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Карточка миссии */
+        .mission-card {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 24px;
+            padding: 24px;
+            animation: fadeIn 0.5s;
+        }
+
+        .mission-icon {
+            font-size: 4rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .mission-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .mission-desc {
+            color: #e0e0e0;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+
+        /* Кнопки выбора */
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background: rgba(46, 125, 50, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 16px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            text-align: left;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            transform: translateX(10px);
+            background: rgba(46, 125, 50, 0.5);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .option-btn.selected-correct {
+            background: rgba(46, 125, 50, 0.8);
+            border-color: #ffd700;
+        }
+
+        .option-btn.selected-wrong {
+            background: rgba(200, 0, 0, 0.8);
+            border-color: #ff4444;
+        }
+
+        .option-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Результат */
+        .result-box {
+            background: rgba(255,255,255,0.05);
+            border-left: 4px solid #ffd700;
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            animation: slideIn 0.3s;
+        }
+
+        .result-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .result-text {
+            color: #e0e0e0;
+            line-height: 1.5;
+        }
+
+        /* Кнопки навигации */
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            flex: 1;
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover:not(:disabled) {
+            background: rgba(255, 215, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        /* Боковая панель */
+        .sidebar {
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,215,0,0.3);
+            border-radius: 24px;
+            padding: 20px;
+        }
+
+        .badges-title {
+            color: #ffd700;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badges-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+            min-height: 200px;
+        }
+
+        .badge {
+            background: rgba(255, 215, 0, 0.1);
+            border: 1px solid #ffd700;
+            border-radius: 30px;
+            padding: 10px 15px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: badgeAppear 0.5s;
+        }
+
+        @keyframes badgeAppear {
+            0% { transform: scale(0) rotate(-180deg); }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .restart-btn {
+            background: rgba(200, 0, 0, 0.2);
+            border: 2px solid #ff4444;
+            border-radius: 16px;
+            padding: 16px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .restart-btn:hover {
+            background: rgba(200, 0, 0, 0.4);
+        }
+
+        /* Уведомления */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(10, 47, 31, 0.9);
+            backdrop-filter: blur(10px);
+            border: 2px solid #ffd700;
+            border-radius: 16px;
+            padding: 16px 24px;
+            color: white;
+            font-weight: bold;
+            animation: slideIn 0.3s, fadeOut 0.3s 2.7s forwards;
+            z-index: 1000;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            to { opacity: 0; transform: translateX(100%); }
+        }
+
+        /* Финальный экран */
+        .final-screen {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .final-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 1s;
+        }
+
+        @keyframes bounce {
+            0%,100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .final-title {
+            font-size: 2.5rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .final-message {
+            color: white;
+            font-size: 1.3rem;
+            line-height: 1.6;
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 16px;
+        }
+
+        .final-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Прогресс-бары миссий */
+        .mission-progress {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .progress-dot {
+            width: 12px;
+            height: 12px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .progress-dot.completed {
+            background: #ffd700;
+            box-shadow: 0 0 10px #ffd700;
+        }
+
+        .progress-dot.current {
+            background: #2e7d32;
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body>
+    <div id="game">
+        <!-- ШАПКА -->
+        <div class="header">
+            <div class="player-row">
+                <div class="player-name">
+                    <span>👨‍🌾 Агронавт</span>
+                    <span class="level-badge" id="levelDisplay">УР 1</span>
+                </div>
+                <div class="exp-bar-container">
+                    <div class="exp-label">
+                        <span>Опыт</span>
+                        <span id="expDisplay">0</span>
+                    </div>
+                    <div class="exp-bar">
+                        <div class="exp-fill" id="expBar" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- РЕСУРСЫ -->
+            <div class="resources-grid" id="resourcesContainer"></div>
+        </div>
+
+        <!-- ОСНОВНОЙ КОНТЕНТ -->
+        <div class="main-content">
+            <!-- ЛЕВАЯ КОЛОНКА - МИССИИ -->
+            <div class="mission-card" id="missionContainer"></div>
+
+            <!-- ПРАВАЯ КОЛОНКА - БЕЙДЖИ -->
+            <div class="sidebar">
+                <div class="badges-title">
+                    <span>🏅</span> Достижения
+                </div>
+                <div class="badges-container" id="badgesContainer"></div>
+                <button class="restart-btn" onclick="restartGame()">🔄 Новая игра</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== ДАННЫЕ ИГРЫ ==========
+        const game = {
+            resources: {
+                money: { value: 300, min: 0, max: 1000, icon: '💰' },
+                reputation: { value: 40, min: 0, max: 100, icon: '🤝' },
+                innovation: { value: 20, min: 0, max: 100, icon: '🔬' },
+                ecology: { value: 50, min: 0, max: 100, icon: '🌱' }
+            },
+            exp: 0,
+            level: 1,
+            badges: [],
+            currentMission: 0,
+            completedMissions: [],
+            answers: {},
+            missions: [
+                {
+                    id: 0,
+                    title: 'Возвращение домой',
+                    desc: 'После учёбы в городе ты вернулся в родной посёлок. Ферма, доставшаяся от деда, в запустении. Амбары пусты, техника сломана, поля заросли. Местные жители с надеждой смотрят на тебя — ты их последняя надежда. С чего начнёшь возрождение?',
+                    icon: '🏠',
+                    options: [
+                        { 
+                            text: '🚁 Купить современный дрон-разведчик, чтобы оценить состояние полей с воздуха', 
+                            effects: { money: -150, innovation: 25, reputation: 10, ecology: 5 },
+                            correct: true, 
+                            feedback: 'Ты запускаешь дрон и видишь полную картину: где пересохшая почва, где вредители, а где скрытые источники воды. Соседи поражены твоим технологичным подходом!'
+                        },
+                        { 
+                            text: '🤝 Собрать соседей на большой субботник, угостить обедом', 
+                            effects: { money: -50, reputation: 30, ecology: 10 },
+                            correct: false, 
+                            feedback: 'Люди откликнулись! За неделю ферма преобразилась. Но без современной техники многое не сделаешь — нужны инновации.'
+                        },
+                        { 
+                            text: '🚜 Купить подержанный трактор у соседа и начать пахать по старинке', 
+                            effects: { money: -80, innovation: -5, ecology: -5 },
+                            correct: false, 
+                            feedback: 'Трактор сломался на третий день. Запчастей нет, поле не вспахано. Старые методы подводят...'
+                        },
+                        { 
+                            text: '🔬 Отправить пробы почвы в лабораторию для точного анализа', 
+                            effects: { money: -100, innovation: 20, ecology: 15 },
+                            correct: false, 
+                            feedback: 'Анализ показал, что почва идеально подходит для органического земледелия. Но пока ты ждал результаты, время упущено. Нужно было начинать с техники.'
+                        }
+                    ]
+                },
+                {
+                    id: 1,
+                    title: 'Битва за урожай',
+                    desc: 'Через месяц напряжённой работы на поля обрушилось настоящее бедствие — тучи саранчи движутся с юга. Учёные говорят, что это нашествие может уничтожить до 80% урожая. Нужно действовать немедленно!',
+                    icon: '🦗',
+                    options: [
+                        { 
+                            text: '🚁 Запустить агродроны с системой компьютерного зрения для точечного опрыскивания', 
+                            effects: { money: -120, innovation: 20, ecology: 15, reputation: 15 },
+                            correct: true, 
+                            feedback: 'Дроны точно определяют скопления вредителей и обрабатывают только поражённые участки. Пчёлы и полезные насекомые не пострадали. Экологи довольны, урожай спасён!'
+                        },
+                        { 
+                            text: '☣️ Залить всё ядохимикатами с трактора — чем больше, тем лучше', 
+                            effects: { money: -60, ecology: -30, reputation: -20 },
+                            correct: false, 
+                            feedback: 'Саранча погибла, но вместе с ней — все пчёлы в округе. Местные пчеловоды подают в суд. Экологическая служба выписала огромный штраф.'
+                        },
+                        { 
+                            text: '👥 Собрать всех жителей посёлка на сбор вредителей вручную', 
+                            effects: { money: -40, reputation: 20, ecology: 5 },
+                            correct: false, 
+                            feedback: 'Люди старались, но саранчи слишком много. Вы спасли только треть урожая. Нужны современные методы.'
+                        },
+                        { 
+                            text: '😱 Надеяться на лучшее и ничего не делать', 
+                            effects: { money: -200, reputation: -30 },
+                            correct: false, 
+                            feedback: 'Саранча уничтожила почти всё. Банк отказывает в кредите, люди разочарованы. Это катастрофа.'
+                        }
+                    ]
+                },
+                {
+                    id: 2,
+                    title: 'Инвестиционный совет',
+                    desc: 'Слухи о твоём хозяйстве дошли до областного центра. К тебе приехали инвесторы — крупные бизнесмены, готовые вложить миллионы. Но им нужно увидеть что-то по-настоящему инновационное. Что ты им покажешь?',
+                    icon: '💼',
+                    options: [
+                        { 
+                            text: '🌿 Проект умной теплицы с автоматическим климат-контролем и LED-подсветкой', 
+                            effects: { money: -300, innovation: 35, reputation: 15, ecology: 10 },
+                            correct: true, 
+                            feedback: 'Инвесторы в восторге! Теплица работает круглый год, урожайность в 5 раз выше. Они вкладывают деньги и обещают помочь с выходом на международный рынок!'
+                        },
+                        { 
+                            text: '🧀 Сыроварню с дегустационным залом', 
+                            effects: { money: -250, innovation: 15, reputation: 25, ecology: 5 },
+                            correct: false, 
+                            feedback: 'Сыроварня отличная, продукция вкусная. Но инвесторы ищут высокие технологии, а не кустарное производство. Они дают денег меньше, чем могли бы.'
+                        },
+                        { 
+                            text: '🏡 Агротуристический комплекс с гостиницей и экскурсиями', 
+                            effects: { money: -150, innovation: 5, reputation: 35, ecology: 15 },
+                            correct: false, 
+                            feedback: 'Туристам нравится, но инвесторы хотят масштабируемых технологий. Ты получил репутацию, но не инвестиции.'
+                        },
+                        { 
+                            text: '📦 Показать действующее хозяйство без инноваций', 
+                            effects: { money: 0, innovation: -10, reputation: -10 },
+                            correct: false, 
+                            feedback: 'Инвесторы вежливо похвалили, но уехали к конкурентам. Без современных технологий в агробизнесе делать нечего.'
+                        }
+                    ]
+                },
+                {
+                    id: 3,
+                    title: 'Команда мечты',
+                    desc: 'Бизнес растёт, заказов много. Одному уже не справиться. Нужно нанимать сотрудников. От этого выбора зависит будущее твоего дела. Кого ты пригласишь в команду?',
+                    icon: '👥',
+                    options: [
+                        { 
+                            text: '🎓 Молодых выпускников местного агротехнического колледжа', 
+                            effects: { money: -150, innovation: 25, reputation: 20, ecology: 5 },
+                            correct: true, 
+                            feedback: 'Это лучшее решение! Молодёжь остаётся в родном посёлке, у них свежие знания, они приносят новые идеи. Ты создаёшь сообщество профессионалов!'
+                        },
+                        { 
+                            text: '👴 Опытных пенсионеров, знающих всё о земле', 
+                            effects: { money: -100, innovation: -5, reputation: 25 },
+                            correct: false, 
+                            feedback: 'Опыт важен, но без молодых специалистов и новых технологий вы отстаёте от конкурентов. Молодёжь продолжает уезжать в город.'
+                        },
+                        { 
+                            text: '🏙️ Дорогих специалистов из города с большим опытом', 
+                            effects: { money: -300, innovation: 30, reputation: -10 },
+                            correct: false, 
+                            feedback: 'Специалисты классные, но они не приживаются в деревне и уезжают через месяц. Местные обижены, что ты не дал им шанса.'
+                        },
+                        { 
+                            text: '👤 Продолжить работать в одиночку, надеясь на свои силы', 
+                            effects: { money: 0, innovation: -15, reputation: -15 },
+                            correct: false, 
+                            feedback: 'Ты выгораешь, заказы срываются, качество падает. Один в поле не воин, особенно в современном агробизнесе.'
+                        }
+                    ]
+                },
+                {
+                    id: 4,
+                    title: 'Судьба посёлка',
+                    desc: 'Прошло три года. Твоё хозяйство — лучшее в области. У тебя современная техника, перерабатывающий завод, лаборатория. В посёлок потянулись люди. И тут приходит предложение от крупного холдинга — они готовы купить твой бизнес за огромные деньги. Твоё решение определит судьбу всего посёлка.',
+                    icon: '🏆',
+                    options: [
+                        { 
+                            text: '🤝 Создать сельскохозяйственный кооператив и обучать местных фермеров современным технологиям', 
+                            effects: { money: -150, innovation: 30, reputation: 40, ecology: 20 },
+                            correct: true, 
+                            feedback: 'ТЫ СДЕЛАЛ ЭТО! Весь посёлок превращается в агротех-кластер. Молодёжь не уезжает — наоборот, приезжают учиться со всей области. Открываются школы, детские сады, строится новое жильё. Ты не просто бизнесмен — ты основатель новой жизни для сотен семей!'
+                        },
+                        { 
+                            text: '💰 Продать бизнес и переехать в город наслаждаться жизнью', 
+                            effects: { money: 500, reputation: -40, ecology: -20 },
+                            correct: false, 
+                            feedback: 'Новый владелец сворачивает социальные программы, увольняет местных, везёт рабочих из-за границы. Посёлок пустеет, магазины закрываются, молодёжь уезжает. Ты богат, но по ночам тебя мучает совесть...'
+                        },
+                        { 
+                            text: '📈 Взять огромный кредит и расширяться дальше, став монополистом', 
+                            effects: { money: 300, moneyCost: 50, innovation: 20, reputation: 10 },
+                            correct: false, 
+                            feedback: 'Ты стал крупнейшим производителем в регионе. Но местные фермеры разорены, они не выдержали конкуренции. Посёлок живёт, но люди на тебя обижены.'
+                        },
+                        { 
+                            text: '🏫 Открыть агротехническую академию для детей и взрослых', 
+                            effects: { money: -200, innovation: 25, reputation: 35, ecology: 15 },
+                            correct: false, 
+                            feedback: 'Академия отличная, знания даёшь, но без кооператива и поддержки фермеров они не могут применить знания на практике. Молодые специалисты уезжают в город, потому что у них нет земли и техники.'
+                        }
+                    ]
+                }
+            ],
+            randomEvents: [
+                { 
+                    text: '🌧️ Аномальная засуха этим летом!', 
+                    effects: { money: -80, reputation: -5 },
+                    details: 'Урожайность упала, но ты справишься.'
+                },
+                { 
+                    text: '🏆 Тебя пригласили на телевидение как лучшего фермера года!', 
+                    effects: { money: 100, reputation: 25 },
+                    details: 'Вся страна узнала о твоём хозяйстве.'
+                },
+                { 
+                    text: '🔥 Пожар в старом амбаре', 
+                    effects: { money: -150 },
+                    details: 'Сгорели запасы сена, но это не остановит тебя.'
+                },
+                { 
+                    text: '📈 Цены на зерно взлетели на мировом рынке', 
+                    effects: { money: 150 },
+                    details: 'Отличная возможность заработать!'
+                },
+                { 
+                    text: '👨‍🎓 Приехали студенты-практиканты из сельхозакадемии', 
+                    effects: { innovation: 15, reputation: 10 },
+                    details: 'Помогут с исследованиями и принесут свежие идеи.'
+                },
+                { 
+                    text: '🐗 Дикие кабаны вытоптали часть посевов кукурузы', 
+                    effects: { money: -100, ecology: -5 },
+                    details: 'Нужно ставить современные заборы.'
+                },
+                {
+                    text: '🤝 Губернатор приехал с визитом и похвалил твоё хозяйство',
+                    effects: { reputation: 20, money: 50 },
+                    details: 'Областная поддержка обеспечена!'
+                },
+                {
+                    text: '🔬 Местные школьники победили на олимпиаде с проектом про твою ферму',
+                    effects: { innovation: 10, reputation: 15 },
+                    details: 'Растёт новое поколение агрономов!'
+                }
+            ]
+        };
+
+        // ========== ИНИЦИАЛИЗАЦИЯ ==========
+        function init() {
+            loadGame();
+            renderResources();
+            renderMission();
+            renderBadges();
+        }
+
+        // ========== РЕНДЕРИНГ ==========
+        function renderResources() {
+            const container = document.getElementById('resourcesContainer');
+            let html = '';
+            
+            for (let [key, res] of Object.entries(game.resources)) {
+                const percent = (res.value / res.max) * 100;
+                const name = {
+                    money: 'Деньги',
+                    reputation: 'Репутация',
+                    innovation: 'Инновации',
+                    ecology: 'Экология'
+                }[key];
+                
+                html += `
+                    <div class="resource-item">
+                        <div class="resource-header">
+                            <span>${res.icon}</span>
+                            <span>${name}</span>
+                        </div>
+                        <div class="resource-bar-bg">
+                            <div class="resource-bar-fill" style="width: ${percent}%" id="bar-${key}"></div>
+                        </div>
+                        <div class="resource-value" id="val-${key}">${res.value}</div>
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+            
+            // Обновление уровня и опыта
+            const totalExp = Object.values(game.resources).reduce((sum, r) => sum + r.value, 0);
+            game.exp = totalExp;
+            game.level = Math.floor(totalExp / 100) + 1;
+            
+            document.getElementById('expDisplay').textContent = totalExp;
+            document.getElementById('expBar').style.width = (totalExp % 100) + '%';
+            document.getElementById('levelDisplay').textContent = `УР ${game.level}`;
+        }
+
+        function renderMission() {
+            if (game.currentMission >= game.missions.length) {
+                showFinal();
+                return;
+            }
+            
+            const mission = game.missions[game.currentMission];
+            const container = document.getElementById('missionContainer');
+            
+            // Прогресс-бары миссий
+            let progressHtml = '<div class="mission-progress">';
+            for (let i = 0; i < game.missions.length; i++) {
+                let cls = 'progress-dot';
+                if (game.completedMissions.includes(i)) cls += ' completed';
+                else if (i === game.currentMission) cls += ' current';
+                progressHtml += `<div class="${cls}"></div>`;
+            }
+            progressHtml += '</div>';
+            
+            let html = progressHtml + `
+                <div class="mission-icon">${mission.icon}</div>
+                <div class="mission-title">${mission.title}</div>
+                <div class="mission-desc">${mission.desc}</div>
+                <div class="options-container" id="optionsContainer">
+            `;
+            
+            mission.options.forEach((opt, index) => {
+                const answered = game.answers[game.currentMission] !== undefined;
+                const selected = game.answers[game.currentMission] === index;
+                let btnClass = 'option-btn';
+                
+                if (answered) {
+                    if (selected) btnClass += opt.correct ? ' selected-correct' : ' selected-wrong';
+                }
+                
+                html += `
+                    <button class="${btnClass}" onclick="selectOption(${index})" ${answered ? 'disabled' : ''}>
+                        <span>${opt.text}</span>
+                    </button>
+                `;
+            });
+            
+            html += `</div>`;
+            
+            // Если уже отвечали, показываем результат
+            if (game.answers[game.currentMission] !== undefined) {
+                const opt = mission.options[game.answers[game.currentMission]];
+                html += `
+                    <div class="result-box">
+                        <div class="result-title" style="color: ${opt.correct ? '#ffd700' : '#ff6b6b'}">
+                            ${opt.correct ? '✅ Правильное решение' : '❌ Не лучший выбор...'}
+                        </div>
+                        <div class="result-text">${opt.feedback}</div>
+                    </div>
+                `;
+            }
+            
+            // Кнопки навигации
+            html += `
+                <div class="nav-buttons">
+                    <button class="btn" onclick="prevMission()" ${game.currentMission === 0 ? 'disabled' : ''}>← Назад</button>
+                    <button class="btn" onclick="nextMission()" ${game.answers[game.currentMission] === undefined ? 'disabled' : ''}>Далее →</button>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        function renderBadges() {
+            const container = document.getElementById('badgesContainer');
+            if (game.badges.length === 0) {
+                container.innerHTML = '<div style="color: #888; text-align: center;">Пока нет достижений</div>';
+            } else {
+                container.innerHTML = game.badges.map(b => `<div class="badge">🏅 ${b}</div>`).join('');
+            }
+        }
+
+        // ========== ИГРОВАЯ ЛОГИКА ==========
+        function selectOption(index) {
+            const mission = game.missions[game.currentMission];
+            const opt = mission.options[index];
+            
+            // Применяем изменения ресурсов
+            if (opt.effects.money) {
+                game.resources.money.value = Math.min(game.resources.money.max, 
+                    Math.max(game.resources.money.min, game.resources.money.value + opt.effects.money));
+            }
+            if (opt.effects.reputation) {
+                game.resources.reputation.value = Math.min(game.resources.reputation.max, 
+                    Math.max(game.resources.reputation.min, game.resources.reputation.value + opt.effects.reputation));
+            }
+            if (opt.effects.innovation) {
+                game.resources.innovation.value = Math.min(game.resources.innovation.max, 
+                    Math.max(game.resources.innovation.min, game.resources.innovation.value + opt.effects.innovation));
+            }
+            if (opt.effects.ecology) {
+                game.resources.ecology.value = Math.min(game.resources.ecology.max, 
+                    Math.max(game.resources.ecology.min, game.resources.ecology.value + opt.effects.ecology));
+            }
+            
+            // Сохраняем ответ
+            game.answers[game.currentMission] = index;
+            if (!game.completedMissions.includes(game.currentMission)) {
+                game.completedMissions.push(game.currentMission);
+            }
+            
+            // Проверяем бейджи
+            checkBadges();
+            
+            // Сохраняем игру
+            saveGame();
+            
+            // Обновляем интерфейс
+            renderResources();
+            renderMission();
+            renderBadges();
+            
+            // Случайное событие после каждой миссии (кроме первой и последней)
+            if (game.currentMission > 0 && game.currentMission < game.missions.length - 1) {
+                // 50% шанс на событие
+                if (Math.random() > 0.5) {
+                    triggerRandomEvent();
+                }
+            }
+        }
+
+        function nextMission() {
+            if (game.currentMission < game.missions.length - 1) {
+                game.currentMission++;
+                renderMission();
+            } else {
+                showFinal();
+            }
+            saveGame();
+        }
+
+        function prevMission() {
+            if (game.currentMission > 0) {
+                game.currentMission--;
+                renderMission();
+            }
+        }
+
+        function triggerRandomEvent() {
+            const event = game.randomEvents[Math.floor(Math.random() * game.randomEvents.length)];
+            
+            // Применяем эффекты
+            if (event.effects.money) {
+                game.resources.money.value = Math.min(game.resources.money.max, 
+                    Math.max(game.resources.money.min, game.resources.money.value + event.effects.money));
+            }
+            if (event.effects.reputation) {
+                game.resources.reputation.value = Math.min(game.resources.reputation.max, 
+                    Math.max(game.resources.reputation.min, game.resources.reputation.value + event.effects.reputation));
+            }
+            if (event.effects.innovation) {
+                game.resources.innovation.value = Math.min(game.resources.innovation.max, 
+                    Math.max(game.resources.innovation.min, game.resources.innovation.value + event.effects.innovation));
+            }
+            if (event.effects.ecology) {
+                game.resources.ecology.value = Math.min(game.resources.ecology.max, 
+                    Math.max(game.resources.ecology.min, game.resources.ecology.value + event.effects.ecology));
+            }
+            
+            // Показываем уведомление
+            showNotification(`${event.text} ${event.details ? ' ' + event.details : ''}`);
+            
+            renderResources();
+            checkBadges();
+            saveGame();
+        }
+
+        function checkBadges() {
+            const r = game.resources;
+            
+            if (r.innovation.value > 70 && !game.badges.includes('Инноватор')) {
+                game.badges.push('Инноватор');
+                showNotification('💡 Новое достижение: Инноватор! Ты внедряешь передовые технологии.');
+            }
+            if (r.ecology.value > 70 && !game.badges.includes('Хранитель природы')) {
+                game.badges.push('Хранитель природы');
+                showNotification('🌳 Новое достижение: Хранитель природы! Твоя ферма экологична.');
+            }
+            if (r.reputation.value > 70 && !game.badges.includes('Народный лидер')) {
+                game.badges.push('Народный лидер');
+                showNotification('👑 Новое достижение: Народный лидер! Люди тебя уважают.');
+            }
+            if (r.money.value > 700 && !game.badges.includes('Успешный бизнесмен')) {
+                game.badges.push('Успешный бизнесмен');
+                showNotification('💰 Новое достижение: Успешный бизнесмен! Дела идут отлично.');
+            }
+            if (game.completedMissions.length >= 5 && !game.badges.includes('Покоритель')) {
+                game.badges.push('Покоритель');
+                showNotification('🏆 Новое достижение: Покоритель! Ты прошёл все испытания.');
+            }
+        }
+
+        function showFinal() {
+            const r = game.resources;
+            let title, message, icon;
+            
+            // Считаем "правильные" ответы
+            const correctCount = Object.values(game.answers).filter((ans, idx) => {
+                return game.missions[idx]?.options[ans]?.correct === true;
+            }).length;
+            
+            if (correctCount >= 4 && r.reputation.value > 60 && r.ecology.value > 60) {
+                title = 'ЛЕГЕНДА АПК';
+                icon = '🏆🌟';
+                message = 'Ты не просто построил успешный бизнес — ты создал новую жизнь для целого посёлка. Молодёжь остаётся здесь, открываются школы, строятся дома, приезжают туристы. Твоё имя вписано в историю региона. Ты доказал, что будущее — за родными полями и современными технологиями!';
+            } else if (r.money.value > 800) {
+                title = 'УСПЕШНЫЙ БИЗНЕСМЕН';
+                icon = '💰';
+                message = 'Ты сколотил состояние. У тебя большой дом в городе, дорогая машина, счета в банке. Но в посёлке, откуда ты родом, остались только старики. Молодёжь уехала. Ты богат, но чего-то не хватает... Может, стоило подумать не только о деньгах?';
+            } else if (r.reputation.value > 70) {
+                title = 'НАРОДНЫЙ ГЕРОЙ';
+                icon = '🤝';
+                message = 'Тебя обожают в посёлке. Люди приходят за советом, тебя благодарят за помощь. Но денег едва хватает на развитие. Ты мог бы зарабатывать больше, если бы смелее внедрял инновации. Репутация — это важно, но бизнес должен приносить прибыль.';
+            } else if (r.innovation.value > 70) {
+                title = 'ИННОВАТОР';
+                icon = '🔬';
+                message = 'Твоя ферма — это настоящий технопарк. Дроны, ИИ, роботы — всё у тебя есть. Специалисты приезжают учиться. Но местные жители чувствуют себя чужими: высокие технологии не заменили человеческого тепла. Ты ушёл вперёд, а люди остались позади.';
+            } else if (r.ecology.value > 70) {
+                title = 'ХРАНИТЕЛЬ ПРИРОДЫ';
+                icon = '🌱';
+                message = 'Земля вокруг твоей фермы стала чище. Птицы вернулись, реки наполнились рыбой. Экологи ставят тебя в пример. Но бизнес еле дышит — органическая продукция дорогая, её мало кто покупает. Ты спас природу, но чуть не потерял дело.';
+            } else if (correctCount <= 2) {
+                title = 'УПУЩЕННЫЙ ШАНС';
+                icon = '😔';
+                message = 'Ферму пришлось продать за долги. Ты уехал обратно в город, работаешь в офисе и вспоминаешь о несбывшейся мечте. А в посёлке, где ты мог изменить всё, по-прежнему пустота. Может, в следующий раз ты решишься выбрать инновации?';
+            } else {
+                title = 'НЕПЛОХОЙ РЕЗУЛЬТАТ';
+                icon = '👍';
+                message = 'Ты справился. Ферма работает, приносит доход, посёлок не умер. Но могло быть лучше. Ты действовал слишком осторожно, боялся рисковать, не всегда выбирал новые технологии. В следующий раз будь смелее — будущее за инновациями!';
+            }
+            
+            const container = document.getElementById('missionContainer');
+            
+            // Прогресс-бары миссий (все заполнены)
+            let progressHtml = '<div class="mission-progress">';
+            for (let i = 0; i < game.missions.length; i++) {
+                progressHtml += `<div class="progress-dot completed"></div>`;
+            }
+            progressHtml += '</div>';
+            
+            container.innerHTML = progressHtml + `
+                <div class="final-screen">
+                    <div class="final-icon">${icon}</div>
+                    <div class="final-title">${title}</div>
+                    <div class="final-message">${message}</div>
+                    <div class="final-badges">
+                        ${game.badges.map(b => `<div class="badge">🏅 ${b}</div>`).join('')}
+                    </div>
+                    <button class="btn" onclick="restartGame()">🔄 Пройти заново</button>
+                </div>
+            `;
+        }
+
+        function showNotification(text) {
+            const notif = document.createElement('div');
+            notif.className = 'notification';
+            notif.textContent = text;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => notif.remove(), 4000);
+        }
+
+        // ========== СОХРАНЕНИЕ ==========
+        function saveGame() {
+            const save = {
+                resources: game.resources,
+                exp: game.exp,
+                level: game.level,
+                badges: game.badges,
+                currentMission: game.currentMission,
+                completedMissions: game.completedMissions,
+                answers: game.answers
+            };
+            localStorage.setItem('agroSave', JSON.stringify(save));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('agroSave');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    game.resources = data.resources;
+                    game.exp = data.exp;
+                    game.level = data.level;
+                    game.badges = data.badges;
+                    game.currentMission = data.currentMission;
+                    game.completedMissions = data.completedMissions;
+                    game.answers = data.answers;
+                } catch (e) {
+                    console.log('Ошибка загрузки сохранения');
+                }
+            }
+        }
+
+        function restartGame() {
+            if (confirm('Начать новую игру? Весь прогресс будет потерян.')) {
+                localStorage.removeItem('agroSave');
+                location.reload();
+            }
+        }
+
+        // ========== СТАРТ ==========
+        window.onload = init;
+    </script>
+</body>
+</html>
